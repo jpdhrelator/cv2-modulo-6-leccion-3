@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Práctica Lección 3 · Binding de Formularios · Guía del alumno</title>
+
+  <!-- Reutilizamos la misma hoja de estilos de la lección -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Estilos propios SOLO de esta guía de práctica -->
+  <style>
+    .ejercicio > h2 { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+    .nivel {
+      font-size: .7rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px;
+      letter-spacing: .5px; text-transform: uppercase;
+    }
+    .nivel.basico { background: #14532d; color: #86efac; }
+    .nivel.medio  { background: #78350f; color: #fcd34d; }
+    .nivel.alto   { background: #7f1d1d; color: #fca5a5; }
+    .instrucciones { counter-reset: paso; list-style: none; padding-left: 0; }
+    .instrucciones li {
+      counter-increment: paso; position: relative; padding-left: 2.4rem; margin: .55rem 0;
+    }
+    .instrucciones li::before {
+      content: counter(paso); position: absolute; left: 0; top: 0;
+      width: 1.7rem; height: 1.7rem; background: var(--primary); color: #0f172a;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: .85rem;
+    }
+    .checklist { list-style: none; padding-left: 0; }
+    .checklist li { padding: .3rem 0 .3rem 1.9rem; position: relative; }
+    .checklist li::before {
+      content: "☐"; position: absolute; left: 0; font-size: 1.2rem; color: var(--primary);
+    }
+    .zona-codigo {
+      background: #0b1220; border: 2px dashed var(--muted);
+      border-radius: 8px; padding: 1.1rem; color: var(--muted);
+      font-family: "Fira Code", monospace; font-size: .85rem; margin-top: 1rem;
+    }
+    .zona-codigo strong { color: var(--warn); }
+    .meta-linea { color: var(--muted); font-size: .85rem; margin: .3rem 0 1rem; }
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="badge">MÓDULO 6 · LECCIÓN 3 · PRÁCTICA</div>
+  <h1>Guía de ejercicios — Binding de Formularios</h1>
+  <p>Tu turno. Acá tienes las instrucciones, las pistas y los criterios de logro. El código <strong>lo escribes tú</strong>. Trabaja en tu proyecto Vue con <strong>Composition API</strong> (<code class="inline">&lt;script setup&gt;</code>), un componente por ejercicio. No hay soluciones en este archivo — a propósito. 💪</p>
+</header>
+
+<div class="layout">
+  <nav class="toc">
+    <h3>Ejercicios</h3>
+    <div class="grp">Cómo empezar</div>
+    <a href="#setup">⚙ Preparación</a>
+    <div class="grp">Uno por tema</div>
+    <a href="#e1">1 · v-bind</a>
+    <a href="#e2">2 · v-model básico</a>
+    <a href="#e3">3 · Modificadores</a>
+    <a href="#e4">4 · textarea</a>
+    <a href="#e5">5 · checkbox</a>
+    <a href="#e6">6 · radio</a>
+    <a href="#e7">7 · select</a>
+    <div class="grp">Desafío final</div>
+    <a href="#final">🏆 Ejercicio unificado</a>
+  </nav>
+
+  <main>
+
+  <!-- ===================== PREPARACIÓN ===================== -->
+  <section class="card" id="setup">
+    <h2>⚙ Preparación — lee esto antes de partir</h2>
+    <p>Cada ejercicio se resuelve en <strong>su propio componente <code class="inline">.vue</code></strong> con <strong>Composition API</strong> (<code class="inline">&lt;script setup&gt;</code>). Dentro de <code class="inline">src/</code> de tu proyecto, organiza así:</p>
+
+    <pre><code><span class="tok-com">src/</span>
+├── App.vue                <span class="tok-com">// importa y muestra los ejercicios</span>
+├── style.css              <span class="tok-com">// estilos de la práctica</span>
+└── components/
+    ├── Ej1Semaforo.vue     <span class="tok-com">// v-bind</span>
+    ├── Ej2Saludo.vue       <span class="tok-com">// v-model básico</span>
+    ├── Ej3Modificadores.vue<span class="tok-com">// .trim / .number / .lazy</span>
+    ├── Ej4Textarea.vue     <span class="tok-com">// v-model en textarea</span>
+    ├── Ej5Checkbox.vue     <span class="tok-com">// checkbox en 3 formas</span>
+    ├── Ej6Radio.vue        <span class="tok-com">// radio</span>
+    ├── Ej7Select.vue       <span class="tok-com">// select</span>
+    └── EjFinalReserva.vue  <span class="tok-com">// desafío unificado</span></code></pre>
+
+    <p>La estructura mínima que vas a repetir en <strong>cada</strong> componente es esta. Cópiala como punto de partida:</p>
+
+    <pre><code><span class="tok-tag">&lt;script</span> <span class="tok-attr">setup</span><span class="tok-tag">&gt;</span>
+  <span class="tok-kw">import</span> { ref } <span class="tok-kw">from</span> <span class="tok-str">'vue'</span>
+
+  <span class="tok-com">// TODO: declara tus variables reactivas con ref()</span>
+  <span class="tok-com">// Con &lt;script setup&gt; NO hay return: todo lo que declaras acá</span>
+  <span class="tok-com">// queda disponible en el template automáticamente.</span>
+<span class="tok-tag">&lt;/script&gt;</span>
+
+<span class="tok-tag">&lt;template&gt;</span>
+  <span class="tok-com">&lt;!-- TODO: aquí va tu HTML con las directivas --&gt;</span>
+<span class="tok-tag">&lt;/template&gt;</span></code></pre>
+
+    <div class="warn">
+      <strong>Lo que cambia respecto a lo anterior:</strong> con <code class="inline">&lt;script setup&gt;</code> ya no existe el <code class="inline">return</code>. Todo lo que declaras en el bloque queda expuesto al template solo. Y <code class="inline">ref</code>, <code class="inline">computed</code>, etc. ya NO vienen de una variable global: los <strong>importas</strong> arriba con <code class="inline">import { ref } from 'vue'</code>.
+    </div>
+    <div class="tip">
+      En <code class="inline">App.vue</code> importa cada componente y móntalos (uno debajo del otro, o con botones para cambiar entre ellos — tú eliges).
+    </div>
+  </section>
+
+  <!-- ===================== EJERCICIO 1 ===================== -->
+  <section class="card ejercicio" id="e1">
+    <h2>1 · Semáforo con <code class="inline">v-bind</code> <span class="nivel basico">Básico</span></h2>
+    <p class="meta-linea">Tema: binding unidireccional · directiva <code class="inline">v-bind</code> / <code class="inline">:</code></p>
+
+    <div class="concept"><strong>🎯 Objetivo:</strong> mostrar un "semáforo" (un círculo) que cambie de color según una variable, sin escribir el color a mano en el HTML.</div>
+
+    <h3 class="sub">📋 Instrucciones</h3>
+    <ol class="instrucciones">
+      <li>Crea una variable reactiva <code class="inline">estado</code> que arranque en <code class="inline">"verde"</code>.</li>
+      <li>Dibuja un <code class="inline">&lt;div&gt;</code> circular y píntale el color de fondo <strong>según</strong> el valor de <code class="inline">estado</code>.</li>
+      <li>Agrega 3 botones ("Verde", "Amarillo", "Rojo") que cambien el valor de <code class="inline">estado</code> al hacer clic.</li>
+      <li>Muestra debajo un texto: "Estado actual: {{ estado }}".</li>
+    </ol>
+
+    <h3 class="sub">💡 Pistas</h3>
+    <div class="tip">
+      <ul>
+        <li>Para el color usa <code class="inline">:style</code> con un objeto: <code class="inline">:style="{ background: ... }"</code>.</li>
+        <li>Para los botones piensa en el evento de clic (<code class="inline">@click</code>). Todavía no vimos eventos en profundidad, pero <code class="inline">@click="estado = 'rojo'"</code> te alcanza.</li>
+        <li>¿Podrías cambiar también una <strong>clase</strong> con <code class="inline">:class</code>? Inténtalo si te sobra tiempo.</li>
+      </ul>
+    </div>
+
+    <h3 class="sub">✅ Lo lograste si...</h3>
+    <ul class="checklist">
+      <li>El círculo cambia de color al tocar cada botón.</li>
+      <li>El texto de abajo refleja el estado en vivo.</li>
+      <li>NO escribiste ningún color fijo dentro del atributo <code class="inline">style</code> del HTML.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== EJERCICIO 2 ===================== -->
+  <section class="card ejercicio" id="e2">
+    <h2>2 · Saludo en vivo con <code class="inline">v-model</code> <span class="nivel basico">Básico</span></h2>
+    <p class="meta-linea">Tema: two-way binding · <code class="inline">v-model</code> en <code class="inline">input</code></p>
+
+    <div class="concept"><strong>🎯 Objetivo:</strong> que al escribir tu nombre en un input, un saludo se actualice al instante en la pantalla.</div>
+
+    <h3 class="sub">📋 Instrucciones</h3>
+    <ol class="instrucciones">
+      <li>Crea una variable <code class="inline">nombre</code> que arranque vacía (<code class="inline">""</code>).</li>
+      <li>Enlaza un <code class="inline">&lt;input&gt;</code> con esa variable en <strong>ambos sentidos</strong>.</li>
+      <li>Muestra un <code class="inline">&lt;h2&gt;</code> que diga "¡Hola, [nombre]!" y se actualice mientras escribes.</li>
+      <li>Si el input está vacío, que el saludo diga "¡Hola, visitante!" en su lugar.</li>
+    </ol>
+
+    <h3 class="sub">💡 Pistas</h3>
+    <div class="tip">
+      <ul>
+        <li>El "ambos sentidos" te lo da UNA sola directiva. ¿Cuál era?</li>
+        <li>Para el caso del nombre vacío, dentro de las llaves <code class="inline">{{ }}</code> puedes usar el operador <code class="inline">||</code>: <code class="inline">{{ nombre || 'visitante' }}</code>.</li>
+      </ul>
+    </div>
+
+    <h3 class="sub">✅ Lo lograste si...</h3>
+    <ul class="checklist">
+      <li>El saludo cambia letra por letra mientras escribes.</li>
+      <li>Al borrar todo, aparece "¡Hola, visitante!".</li>
+    </ul>
+  </section>
+
+  <!-- ===================== EJERCICIO 3 ===================== -->
+  <section class="card ejercicio" id="e3">
+    <h2>3 · Los modificadores importan <span class="nivel medio">Medio</span></h2>
+    <p class="meta-linea">Tema: <code class="inline">.trim</code> · <code class="inline">.number</code> · <code class="inline">.lazy</code></p>
+
+    <div class="concept"><strong>🎯 Objetivo:</strong> demostrar con tus propios ojos por qué los modificadores de <code class="inline">v-model</code> no son un adorno.</div>
+
+    <h3 class="sub">📋 Instrucciones</h3>
+    <ol class="instrucciones">
+      <li>Crea DOS inputs de tipo número: <code class="inline">a</code> y <code class="inline">b</code>. A UNO ponle el modificador de número y al otro NO.</li>
+      <li>Muestra el resultado de <code class="inline">a + b</code> para cada caso y observa la diferencia.</li>
+      <li>Crea un input de texto <code class="inline">usuario</code> con el modificador que elimina espacios. Muestra su largo (<code class="inline">.length</code>) para comprobar que los espacios no se cuentan.</li>
+      <li>Crea un input <code class="inline">email</code> con el modificador que actualiza <strong>al salir del campo</strong>. Fíjate que el valor NO cambia mientras escribes, solo al hacer clic afuera.</li>
+    </ol>
+
+    <h3 class="sub">💡 Pistas</h3>
+    <div class="warn">
+      Sin el modificador de número, un input entrega <strong>texto</strong>. Y <code class="inline">"2" + "3"</code> en JavaScript da <code class="inline">"23"</code>, no 5. Ese es justo el bug que este ejercicio te hace ver. Usa <code class="inline">typeof</code> para comprobar el tipo de dato.
+    </div>
+    <div class="tip">Los tres modificadores se escriben pegados a v-model con un punto: <code class="inline">v-model.___="..."</code>. Repasa la diapositiva de modificadores si no te acuerdas de los nombres.</div>
+
+    <h3 class="sub">✅ Lo lograste si...</h3>
+    <ul class="checklist">
+      <li>Ves claramente que un caso SUMA (5) y el otro CONCATENA ("23").</li>
+      <li>Al escribir "  hola  " con espacios, el largo mostrado es 4, no 8.</li>
+      <li>El email solo se refleja al salir del campo.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== EJERCICIO 4 ===================== -->
+  <section class="card ejercicio" id="e4">
+    <h2>4 · Bloc de notas con <code class="inline">textarea</code> <span class="nivel basico">Básico</span></h2>
+    <p class="meta-linea">Tema: <code class="inline">v-model</code> en <code class="inline">textarea</code></p>
+
+    <div class="concept"><strong>🎯 Objetivo:</strong> un área de texto multilínea con contador de caracteres y vista previa que respete los saltos de línea.</div>
+
+    <h3 class="sub">📋 Instrucciones</h3>
+    <ol class="instrucciones">
+      <li>Crea una variable <code class="inline">nota</code> y enlázala a un <code class="inline">&lt;textarea&gt;</code>.</li>
+      <li>Muestra cuántos caracteres lleva escritos.</li>
+      <li>Muestra una vista previa del texto que <strong>conserve los saltos de línea</strong>.</li>
+      <li>Extra: cambia el color del contador a rojo si supera los 200 caracteres.</li>
+    </ol>
+
+    <h3 class="sub">💡 Pistas</h3>
+    <div class="tip">
+      <ul>
+        <li>Un <code class="inline">&lt;p&gt;</code> normal NO respeta los <code class="inline">\n</code>. ¿Qué etiqueta HTML sí lo hace? (empieza con "pre").</li>
+        <li>El largo de un string se obtiene con <code class="inline">.length</code>.</li>
+        <li>Para el color condicional, recuerda <code class="inline">:style</code> con un ternario.</li>
+      </ul>
+    </div>
+
+    <h3 class="sub">✅ Lo lograste si...</h3>
+    <ul class="checklist">
+      <li>Escribes varias líneas y la vista previa las muestra separadas.</li>
+      <li>El contador sube en tiempo real.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== EJERCICIO 5 ===================== -->
+  <section class="card ejercicio" id="e5">
+    <h2>5 · Checkbox en sus 3 formas <span class="nivel medio">Medio</span></h2>
+    <p class="meta-linea">Tema: <code class="inline">checkbox</code> booleano · array · <code class="inline">:true-value</code>/<code class="inline">:false-value</code></p>
+
+    <div class="concept"><strong>🎯 Objetivo:</strong> dominar los tres comportamientos del checkbox con <code class="inline">v-model</code>.</div>
+
+    <h3 class="sub">📋 Instrucciones</h3>
+    <ol class="instrucciones">
+      <li><strong>Booleano:</strong> un checkbox "Suscribirme al newsletter" enlazado a una variable que valga <code class="inline">true</code>/<code class="inline">false</code>. Muéstrala.</li>
+      <li><strong>Array:</strong> tres o más checkboxes de "hobbies" (leer, deporte, música...) que compartan el <strong>mismo</strong> <code class="inline">v-model</code>. Muestra el array resultante y cuántos hay marcados.</li>
+      <li><strong>Valores personalizados:</strong> un checkbox "Modo" que guarde <code class="inline">"pro"</code> cuando está marcado y <code class="inline">"gratis"</code> cuando no. (Nada de true/false aquí).</li>
+    </ol>
+
+    <h3 class="sub">💡 Pistas</h3>
+    <div class="tip">
+      <ul>
+        <li>Para el caso array, la variable debe arrancar como <code class="inline">ref([])</code> y cada checkbox necesita su atributo <code class="inline">value</code>.</li>
+        <li>Para los valores personalizados busca los atributos <code class="inline">:true-value</code> y <code class="inline">:false-value</code>. Ojo con las comillas: <code class="inline">:true-value="'pro'"</code>.</li>
+      </ul>
+    </div>
+
+    <h3 class="sub">✅ Lo lograste si...</h3>
+    <ul class="checklist">
+      <li>El booleano muestra true/false.</li>
+      <li>Al marcar hobbies, el array crece y decrece.</li>
+      <li>El "Modo" muestra "pro" o "gratis", nunca true/false.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== EJERCICIO 6 ===================== -->
+  <section class="card ejercicio" id="e6">
+    <h2>6 · Encuesta con <code class="inline">radio</code> <span class="nivel basico">Básico</span></h2>
+    <p class="meta-linea">Tema: <code class="inline">radio</code> con <code class="inline">v-model</code></p>
+
+    <div class="concept"><strong>🎯 Objetivo:</strong> una pregunta con opciones donde solo se puede elegir UNA.</div>
+
+    <h3 class="sub">📋 Instrucciones</h3>
+    <ol class="instrucciones">
+      <li>Pregunta: "¿Cómo calificarías la clase?" con opciones: Excelente, Buena, Regular, Mala.</li>
+      <li>Todas las opciones deben compartir el <strong>mismo</strong> <code class="inline">v-model</code>.</li>
+      <li>Muestra abajo la opción elegida.</li>
+      <li>Extra: muestra un mensaje distinto según la respuesta (por ejemplo, "¡Gracias!" si es Excelente o Buena).</li>
+    </ol>
+
+    <h3 class="sub">💡 Pistas</h3>
+    <div class="tip">
+      <ul>
+        <li>La regla de oro del radio: mismo <code class="inline">v-model</code> para todo el grupo, y cada uno con su <code class="inline">value</code>.</li>
+        <li>La variable guardará automáticamente el <code class="inline">value</code> del seleccionado. No tienes que recorrer nada.</li>
+        <li>Para el mensaje extra, un <code class="inline">v-if</code> / <code class="inline">v-else</code> te sirve.</li>
+      </ul>
+    </div>
+
+    <h3 class="sub">✅ Lo lograste si...</h3>
+    <ul class="checklist">
+      <li>Solo se puede marcar una opción a la vez.</li>
+      <li>El texto refleja la elección al instante.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== EJERCICIO 7 ===================== -->
+  <section class="card ejercicio" id="e7">
+    <h2>7 · Elige tu plan con <code class="inline">select</code> <span class="nivel medio">Medio</span></h2>
+    <p class="meta-linea">Tema: <code class="inline">select</code> con <code class="inline">v-model</code></p>
+
+    <div class="concept"><strong>🎯 Objetivo:</strong> una lista desplegable que enlaza el plan elegido y muestra su precio.</div>
+
+    <h3 class="sub">📋 Instrucciones</h3>
+    <ol class="instrucciones">
+      <li>Crea un <code class="inline">&lt;select&gt;</code> con planes: Básico, Pro, Premium.</li>
+      <li>Agrega una primera opción deshabilitada como "Selecciona un plan" (placeholder).</li>
+      <li>Muestra el plan elegido y su precio (invéntalos: por ej. Básico $0, Pro $9.990, Premium $19.990).</li>
+      <li>Extra: deshabilita un botón "Contratar" hasta que se elija un plan.</li>
+    </ol>
+
+    <h3 class="sub">💡 Pistas</h3>
+    <div class="tip">
+      <ul>
+        <li>El placeholder es una <code class="inline">&lt;option disabled value=""&gt;</code> y la variable arranca en <code class="inline">""</code>.</li>
+        <li>Para el precio, puedes guardar un objeto <code class="inline">{ basico: 0, pro: 9990, ... }</code> y leerlo según el plan elegido.</li>
+        <li>Para deshabilitar el botón: <code class="inline">:disabled</code>. Ya lo usaste en el ejercicio 1, ¿te acuerdas?</li>
+      </ul>
+    </div>
+
+    <h3 class="sub">✅ Lo lograste si...</h3>
+    <ul class="checklist">
+      <li>El precio cambia según el plan.</li>
+      <li>El botón "Contratar" está bloqueado hasta elegir.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== EJERCICIO UNIFICADO ===================== -->
+  <section class="card ejercicio" id="final">
+    <h2>🏆 Ejercicio unificado — Reserva de hotel <span class="nivel alto">Desafío</span></h2>
+    <p class="meta-linea">Tema: TODO junto · input · modificadores · textarea · checkbox · radio · select · v-bind</p>
+
+    <div class="concept">
+      <strong>🎯 Objetivo:</strong> construir UN formulario completo de "Reserva de hotel" que use <strong>todos</strong> los tipos de campo vistos en la lección y muestre un resumen en vivo de la reserva. Este es el que demuestra que de verdad entendiste la clase.
+    </div>
+
+    <h3 class="sub">📋 Requisitos — tu formulario debe incluir</h3>
+    <ol class="instrucciones">
+      <li><strong>Nombre del huésped</strong> → input de texto sin espacios sobrantes (modificador correspondiente).</li>
+      <li><strong>Cantidad de noches</strong> → input numérico que sume de verdad (modificador correspondiente).</li>
+      <li><strong>Tipo de habitación</strong> → un <code class="inline">select</code> (Individual, Doble, Suite) con precios por noche distintos.</li>
+      <li><strong>Régimen</strong> → <code class="inline">radio</code> (Solo alojamiento, Desayuno incluido, Pensión completa).</li>
+      <li><strong>Servicios extra</strong> → <code class="inline">checkbox</code> en modo array (WiFi premium, Estacionamiento, Spa...), cada uno con su precio.</li>
+      <li><strong>¿Fumador?</strong> → un <code class="inline">checkbox</code> con valores personalizados que guarde <code class="inline">"fumador"</code> / <code class="inline">"no-fumador"</code>.</li>
+      <li><strong>Peticiones especiales</strong> → un <code class="inline">textarea</code>.</li>
+      <li><strong>Acepto la política de cancelación</strong> → checkbox booleano obligatorio.</li>
+      <li><strong>Resumen en vivo</strong> → un panel que muestre TODOS los datos elegidos y el <strong>precio total</strong> calculado (noches × precio habitación + extras).</li>
+      <li><strong>Botón "Reservar"</strong> → deshabilitado (<code class="inline">:disabled</code>) mientras falten el nombre, la habitación o la aceptación de la política.</li>
+    </ol>
+
+    <h3 class="sub">💡 Pistas</h3>
+    <div class="tip">
+      <ul>
+        <li>Arranca declarando TODAS las variables reactivas en el <code class="inline">setup()</code>. Una por cada campo.</li>
+        <li>Para el precio total, la lógica es: <code class="inline">precioHabitacion * noches + suma de extras</code>. Piensa cómo sumar los extras del array (cada extra tiene un precio).</li>
+        <li>Para el botón: la condición de "deshabilitado" es una expresión que combina varias comprobaciones con <code class="inline">&amp;&amp;</code> y <code class="inline">||</code>.</li>
+        <li>El resumen en vivo son solo <code class="inline">{{ }}</code> leyendo tus variables. Si el binding está bien, el resumen se actualiza SOLO.</li>
+        <li>Formatea el precio bonito con <code class="inline">.toLocaleString('es-CL')</code>.</li>
+      </ul>
+    </div>
+
+    <div class="warn">
+      <strong>Ojo, no te saltes esto:</strong> si el precio total te da <code class="inline">NaN</code> o algo raro, casi seguro es porque un input te está entregando texto en vez de número. Ya sabes qué modificador arregla eso. Ese error es INTENCIONAL en el diseño del ejercicio: quiero que lo encuentres tú.
+    </div>
+
+    <h3 class="sub">✅ Lo lograste si...</h3>
+    <ul class="checklist">
+      <li>Usaste los 7 tipos de campo de la lección al menos una vez.</li>
+      <li>El precio total se recalcula solo al cambiar cualquier campo.</li>
+      <li>El botón "Reservar" se bloquea/desbloquea según los campos obligatorios.</li>
+      <li>El resumen refleja exactamente lo que elegiste, sin tocar el DOM a mano.</li>
+      <li>No hay ningún <code class="inline">NaN</code> en el precio.</li>
+    </ul>
+
+    <h3 class="sub">🧩 Punto de partida (esqueleto — complétalo tú en <code class="inline">EjFinalReserva.vue</code>)</h3>
+    <div class="zona-codigo">
+      &lt;script setup&gt;<br>
+      &nbsp;&nbsp;import { ref, computed } from 'vue'<br><br>
+      &nbsp;&nbsp;<strong>// TODO: declara nombre, noches, habitacion, regimen, extras, fumador, peticiones, aceptaPolitica</strong><br>
+      &nbsp;&nbsp;<strong>// TODO: calcula el precio total con computed()</strong><br>
+      &lt;/script&gt;<br><br>
+      &lt;template&gt;<br>
+      &nbsp;&nbsp;<strong>&lt;!-- TODO: construye aquí tu formulario con las directivas --&gt;</strong><br>
+      &lt;/template&gt;
+    </div>
+    <div class="tip"><strong>Pista de oro:</strong> para el precio total investiga <code class="inline">computed</code> de Vue. No lo vimos formalmente, pero es la forma correcta de crear un valor que se calcula solo a partir de otros. Búscalo: "computed vue composition api".</div>
+  </section>
+
+
+
+  <footer>
+    Guía de práctica · Lección 3 · Módulo 6 · Binding de formularios con Composition API · ¡A programar! 💪
+  </footer>
+
+  </main>
+</div>
+
+</body>
+</html>
