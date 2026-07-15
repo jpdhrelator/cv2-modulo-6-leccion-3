@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Práctica en parejas · TalentoStore · reactive & ref</title>
+
+  <!-- ⚠️ SOLO para que este archivo corra con doble clic.
+       En clase ustedes lo arman en su app de VITE (npm create vite). -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    :root{--bg:#0f172a;--panel:#1e293b;--ink:#e2e8f0;--muted:#94a3b8;--primary:#42b883;--navy:#35495e;--accent:#38bdf8;--line:#334155;}
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;}
+    header.hero{background:linear-gradient(135deg,var(--navy),#0f172a);padding:2rem 1.5rem;border-bottom:3px solid var(--primary);}
+    .badge{display:inline-block;background:var(--primary);color:#0f172a;font-weight:700;font-size:.72rem;padding:.2rem .6rem;border-radius:999px;letter-spacing:.5px;}
+    header.hero h1{margin:.6rem 0 .3rem;font-size:1.6rem;}
+    header.hero p{margin:0;color:var(--muted);max-width:70ch;}
+    main{max-width:1100px;margin:0 auto;padding:1.5rem;}
+    .brief{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.3rem;}
+    .card h3{margin-top:0;}
+    .rolA h3{color:var(--accent);} .rolB h3{color:var(--primary);}
+    .card ul{padding-left:1.1rem;margin:.4rem 0;} .card li{margin:.25rem 0;font-size:.92rem;}
+    code{background:#0b1220;color:var(--primary);padding:.1rem .4rem;border-radius:5px;font-size:.88em;}
+    .contract{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:1rem 1.3rem;margin-bottom:1.5rem;}
+    .contract h3{margin-top:0;color:var(--accent);}
+    pre{background:#060b17;border:1px solid var(--line);border-radius:8px;padding:1rem;overflow-x:auto;font-size:.82rem;line-height:1.5;color:#cbd5e1;}
+    .app-shell{background:#f8fafc;color:#1e293b;border-radius:12px;padding:1.25rem;border:2px dashed var(--primary);}
+    .grid{display:grid;grid-template-columns:1.3fr 1fr;gap:1.25rem;}
+    .box{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:1rem;}
+    .box h4{margin:0 0 .6rem;color:var(--navy);}
+    .prod{display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.5rem .7rem;margin-bottom:.5rem;font-size:.92rem;}
+    .cart-item{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px solid #eef2f7;font-size:.9rem;}
+    .cart-item .sp{margin-left:auto;font-weight:700;}
+    label{display:block;font-weight:600;margin:.6rem 0 .25rem;color:#334155;font-size:.9rem;}
+    input{width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;font-size:.95rem;}
+    input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(66,184,131,.25);}
+    .btn{background:var(--primary);color:#0f172a;border:none;padding:.5rem 1rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem;}
+    .btn.sm{padding:.25rem .6rem;font-size:.8rem;}
+    .btn:disabled{background:#cbd5e1;color:#64748b;cursor:not-allowed;}
+    .link{background:none;border:none;color:#f87171;cursor:pointer;text-decoration:underline;font-size:.82rem;}
+    .totbox{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:.8rem 1rem;margin-top:.8rem;display:grid;gap:.25rem;font-size:.9rem;}
+    .totbox b{color:#86efac;float:right;}
+    .totbox .big{border-top:1px solid #334155;margin-top:.3rem;padding-top:.4rem;font-size:1.05rem;}
+    .err{color:#dc2626;font-size:.8rem;}
+    .ok{background:#dcfce7;color:#166534;padding:.8rem;border-radius:8px;font-weight:600;margin-top:.7rem;}
+    .empty{color:#64748b;font-style:italic;}
+    .todo{background:#fff7ed;border-left:4px solid #fb923c;padding:.5rem .7rem;border-radius:0 6px 6px 0;font-size:.82rem;color:#9a3412;margin:.5rem 0;}
+    .checklist{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1.3rem;margin-top:1.5rem;}
+    .checklist h3{margin-top:0;color:var(--primary);}
+    .checklist li{margin:.3rem 0;font-size:.92rem;}
+    footer{padding:1.5rem;color:var(--muted);text-align:center;font-size:.85rem;}
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="badge">MÓDULO 6 · LECCIÓN 3 · DÍA 2</span>
+  <h1>🛒 TalentoStore — Práctica en parejas (60 min)</h1>
+  <p>Construyan un carrito de compras reactivo aplicando <code>reactive</code>, <code>ref</code>,
+  <code>computed</code> y <code>v-model</code>. Trabajen de a 2 dividiéndose por roles, o solos
+  completando ambos. El esqueleto ya está montado: solo tienen que llenar los <strong>TODO</strong>.</p>
+</header>
+
+<main>
+
+  <!-- ================= BRIEFING DE ROLES ================= -->
+  <div class="brief">
+    <div class="card rolA">
+      <h3>🅰️ Rol A — Estado &amp; Lógica</h3>
+      <p style="margin:.2rem 0;color:var(--muted);font-size:.9rem;">Dueño de los datos. No toca casi nada del HTML.</p>
+      <ul>
+        <li>Crear el estado del negocio con <code>reactive</code> (<code>tienda.carrito</code>).</li>
+        <li><code>agregarAlCarrito(producto)</code> — suma cantidad si ya existe.</li>
+        <li><code>quitarDelCarrito(id)</code> — elimina el ítem.</li>
+        <li><code>cambiarCantidad(id, delta)</code> — +1 / −1 (mín 1).</li>
+        <li>Los <code>computed</code>: <code>totalItems</code>, <code>subtotal</code>,
+          <code>descuento</code>, <code>total</code>.</li>
+      </ul>
+    </div>
+    <div class="card rolB">
+      <h3>🅱️ Rol B — Interfaz &amp; Cliente</h3>
+      <p style="margin:.2rem 0;color:var(--muted);font-size:.9rem;">Dueño de la pantalla. Consume lo que expone Rol A.</p>
+      <ul>
+        <li>Pintar el catálogo con <code>v-for</code> y botón "Agregar".</li>
+        <li>Pintar el carrito y los controles + / − / quitar.</li>
+        <li>Formulario del cliente con <code>v-model</code> (<code>reactive</code> <code>cliente</code>).</li>
+        <li><code>computed</code> <code>emailValido</code> y <code>puedeComprar</code>.</li>
+        <li>Botón "Finalizar compra" con <code>:disabled</code> y mensaje de éxito.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================= CONTRATO COMPARTIDO ================= -->
+  <div class="contract">
+    <h3>🤝 Contrato compartido — acuérdenlo ANTES de empezar</h3>
+    <p style="margin:.2rem 0 .6rem;color:var(--muted);font-size:.9rem;">
+      Estos nombres son el "cable" entre A y B. Si respetan estos nombres, pueden
+      programar en paralelo y al final todo calza. NO los cambien sin avisar al compañero.</p>
+    <pre>ESTADO (Rol A):
+  tienda.carrito        -> array de { id, nombre, precio, cantidad }
+  cliente.nombre        -> string   (Rol B lo llena con v-model)
+  cliente.email         -> string   (Rol B lo llena con v-model)
+
+FUNCIONES (Rol A las crea, Rol B las llama):
+  agregarAlCarrito(producto)
+  quitarDelCarrito(id)
+  cambiarCantidad(id, delta)
+
+COMPUTED (Rol A los expone, Rol B los muestra):
+  totalItems   subtotal   descuento   total
+  // Regla de descuento: 10% si subtotal >= 50.000</pre>
+  </div>
+
+  <!-- ================= LA APP (esqueleto a completar) ================= -->
+  <div id="app" class="app-shell">
+    <div class="grid">
+
+      <!-- ---------- IZQUIERDA: catálogo + carrito (Rol B pinta, Rol A da datos) ---------- -->
+      <div>
+        <div class="box">
+          <h4>Catálogo</h4>
+          <!-- TODO ROL B: recorrer 'catalogo' con v-for y llamar agregarAlCarrito(p) -->
+          <div class="prod" v-for="p in catalogo" :key="p.id">
+            <span>{{ p.nombre }}</span>
+            <b>${{ formato(p.precio) }}</b>
+            <button class="btn sm" @click="agregarAlCarrito(p)">+ Agregar</button>
+          </div>
+        </div>
+
+        <div class="box" style="margin-top:1rem;">
+          <h4>Carrito ({{ totalItems }})</h4>
+
+          <p v-if="tienda.carrito.length === 0" class="empty">El carrito está vacío 🛒</p>
+
+          <!-- TODO ROL B: mostrar cada ítem con controles + / - / quitar -->
+          <div class="cart-item" v-for="item in tienda.carrito" :key="item.id">
+            <button class="btn sm" @click="cambiarCantidad(item.id, -1)">−</button>
+            <span>{{ item.cantidad }}</span>
+            <button class="btn sm" @click="cambiarCantidad(item.id, 1)">+</button>
+            {{ item.nombre }}
+            <span class="sp">${{ formato(item.precio * item.cantidad) }}</span>
+            <button class="link" @click="quitarDelCarrito(item.id)">quitar</button>
+          </div>
+
+          <!-- TODO ROL A: estos computed deben calcular de verdad (ahora dan 0) -->
+          <div class="totbox">
+            <div>Subtotal <b>${{ formato(subtotal) }}</b></div>
+            <div>Descuento <b>−${{ formato(descuento) }}</b></div>
+            <div class="big">Total <b>${{ formato(total) }}</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------- DERECHA: datos del cliente (Rol B) ---------- -->
+      <div class="box">
+        <h4>Tus datos</h4>
+
+        <!-- TODO ROL B: conectar con v-model a cliente.nombre y cliente.email -->
+        <label>Nombre *</label>
+        <input type="text" v-model.trim="cliente.nombre" placeholder="Tu nombre" />
+
+        <label>Email *</label>
+        <input type="email" v-model.trim="cliente.email" placeholder="tucorreo@mail.com" />
+        <span v-if="cliente.email && !emailValido" class="err">Email inválido</span>
+
+        <!-- TODO ROL B: :disabled debe usar el computed puedeComprar -->
+        <button class="btn" style="margin-top:1rem;width:100%;"
+                :disabled="!puedeComprar" @click="finalizar">
+          {{ puedeComprar ? 'Finalizar compra ✔' : 'Completa carrito y datos' }}
+        </button>
+
+        <div v-if="compraLista" class="ok">
+          ✅ ¡Gracias {{ cliente.nombre }}! Pagaste ${{ formato(total) }} por {{ totalItems }} producto(s).
+        </div>
+
+        <div class="todo">
+          💡 Pista: <code>puedeComprar</code> = hay ítems en el carrito
+          <b>Y</b> el nombre no está vacío <b>Y</b> <code>emailValido</code> es true.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= CHECKLIST DE ENTREGA ================= -->
+  <div class="checklist">
+    <h3>✅ Checklist — está listo cuando…</h3>
+    <ul>
+      <li>Agregar un producto lo hace aparecer en el carrito (y si repites, sube la cantidad).</li>
+      <li>Los botones + / − cambian la cantidad y el subtotal reacciona solo.</li>
+      <li>"Quitar" elimina el ítem del carrito.</li>
+      <li>Subtotal, descuento (10% sobre $50.000) y total son correctos.</li>
+      <li>El botón "Finalizar" está deshabilitado hasta que hay carrito + nombre + email válido.</li>
+      <li>Al finalizar aparece el mensaje de éxito con el nombre y el total.</li>
+    </ul>
+    <p style="margin:.6rem 0 0;color:var(--muted);font-size:.88rem;">
+      <b>Bonus (si sobra tiempo):</b> botón "Vaciar carrito" · contador de stock por producto ·
+      un <code>watch</code> que avise cuando el total supera $100.000 · guardar el carrito en <code>localStorage</code>.
+    </p>
+  </div>
+
+</main>
+
+<footer>TalentoStore · Práctica reactive &amp; ref · Recuérdalo: <code>reactive</code> para el objeto de negocio, <code>ref</code> para lo suelto.</footer>
+
+<script>
+  const { createApp, reactive, ref, computed } = Vue;
+
+  createApp({
+    setup() {
+      /* ====== DATO FIJO: catálogo (ya está listo, no lo toquen) ====== */
+      const catalogo = [
+        { id: 1, nombre: 'Polera TalentoDev', precio: 12990 },
+        { id: 2, nombre: 'Taza "console.log"', precio: 6990 },
+        { id: 3, nombre: 'Stickers pack',      precio: 3990 },
+        { id: 4, nombre: 'Hoodie Vue',         precio: 34990 },
+      ];
+
+      /* Utilidad para formatear pesos chilenos (ya está lista) */
+      const formato = (n) => Number(n || 0).toLocaleString('es-CL');
+
+      /* ============================================================
+         🅰️  ROL A — ESTADO Y LÓGICA
+         ============================================================ */
+
+      // Estado de negocio con reactive (objeto que agrupa el carrito)
+      const tienda = reactive({
+        carrito: [],   // { id, nombre, precio, cantidad }
+      });
+
+      function agregarAlCarrito(producto) {
+        // TODO ROL A:
+        //  1. Buscar si el producto ya está en tienda.carrito (por id).
+        //  2. Si está -> sumar 1 a su cantidad.
+        //  3. Si NO está -> hacer push de { ...producto, cantidad: 1 }.
+      }
+
+      function quitarDelCarrito(id) {
+        // TODO ROL A: eliminar del array el ítem con ese id (splice o filter).
+      }
+
+      function cambiarCantidad(id, delta) {
+        // TODO ROL A: encontrar el ítem y sumarle delta.
+        // Ojo: la cantidad no puede bajar de 1.
+      }
+
+      // Valores DERIVADOS con computed (no se guardan, se calculan)
+      // Ahora devuelven 0 como placeholder -> reemplaza el 0 por el cálculo real.
+      const totalItems = computed(() => {
+        // TODO ROL A: sumar todas las cantidades del carrito.
+        return 0;
+      });
+
+      const subtotal = computed(() => {
+        // TODO ROL A: sumar precio * cantidad de cada ítem.
+        return 0;
+      });
+
+      const descuento = computed(() => {
+        // TODO ROL A: 10% del subtotal SOLO si subtotal >= 50.000, si no 0.
+        return 0;
+      });
+
+      const total = computed(() => {
+        // TODO ROL A: subtotal menos descuento.
+        return 0;
+      });
+
+      /* ============================================================
+         🅱️  ROL B — INTERFAZ Y CLIENTE
+         ============================================================ */
+
+      // Datos del cliente con reactive (objeto), conectados por v-model
+      const cliente = reactive({
+        nombre: '',
+        email: '',
+      });
+
+      const compraLista = ref(false);
+
+      const emailValido = computed(() => {
+        // TODO ROL B: validar el email con esta regex: /^[^@]+@[^@]+\.[^@]+$/
+        return false;
+      });
+
+      const puedeComprar = computed(() => {
+        // TODO ROL B: hay ítems en el carrito Y nombre no vacío Y emailValido.
+        return false;
+      });
+
+      function finalizar() {
+        // TODO ROL B: si puedeComprar, marcar compraLista.value = true.
+      }
+
+      /* ====== Exponer todo al template ====== */
+      return {
+        catalogo, formato,
+        // Rol A
+        tienda, agregarAlCarrito, quitarDelCarrito, cambiarCantidad,
+        totalItems, subtotal, descuento, total,
+        // Rol B
+        cliente, emailValido, puedeComprar, finalizar, compraLista,
+      };
+    }
+  }).mount('#app');
+</script>
+
+</body>
+</html>
