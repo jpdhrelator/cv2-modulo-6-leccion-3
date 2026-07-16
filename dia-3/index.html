@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TalentoCine · Práctica en parejas · Lección 3</title>
+
+  <!-- Vue 3 por CDN: por eso este proyecto NO necesita build.
+       Es un solo archivo estático -> se despliega tal cual en GitHub Pages. -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    :root{--bg:#0f172a;--panel:#1e293b;--ink:#e2e8f0;--muted:#94a3b8;--primary:#42b883;--navy:#35495e;--accent:#38bdf8;--line:#334155;--gold:#fbbf24;}
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;}
+    header.hero{background:linear-gradient(135deg,var(--navy),#0f172a);padding:2rem 1.5rem;border-bottom:3px solid var(--primary);}
+    .badge{display:inline-block;background:var(--primary);color:#0f172a;font-weight:700;font-size:.72rem;padding:.2rem .6rem;border-radius:999px;letter-spacing:.5px;}
+    header.hero h1{margin:.6rem 0 .3rem;font-size:1.7rem;}
+    header.hero p{margin:0;color:var(--muted);max-width:72ch;}
+    main{max-width:1100px;margin:0 auto;padding:1.5rem;}
+    .brief{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.3rem;}
+    .card h3{margin-top:0;}.rolA h3{color:var(--accent);}.rolB h3{color:var(--primary);}
+    .card ul{padding-left:1.1rem;margin:.4rem 0;}.card li{margin:.25rem 0;font-size:.92rem;}
+    code{background:#0b1220;color:var(--primary);padding:.1rem .4rem;border-radius:5px;font-size:.88em;}
+    .contract{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:1rem 1.3rem;margin-bottom:1.5rem;}
+    .contract h3{margin-top:0;color:var(--accent);}
+    pre{background:#060b17;border:1px solid var(--line);border-radius:8px;padding:1rem;overflow-x:auto;font-size:.82rem;line-height:1.5;color:#cbd5e1;}
+
+    /* ----- La app ----- */
+    .app-shell{background:#f8fafc;color:#1e293b;border-radius:12px;padding:1.5rem;border:2px dashed var(--primary);}
+    .cine-grid{display:flex;gap:1.5rem;flex-wrap:wrap;}
+    .sala{flex:2;min-width:320px;}
+    .pantalla{background:linear-gradient(#cbd5e1,#eef2f7);color:#475569;text-align:center;font-weight:700;letter-spacing:4px;padding:.5rem;border-radius:6px 6px 40px 40px/6px 6px 20px 20px;margin-bottom:1.5rem;font-size:.8rem;box-shadow:0 8px 20px -8px rgba(0,0,0,.4);}
+    .fila{display:flex;align-items:center;gap:.35rem;justify-content:center;margin-bottom:.35rem;}
+    .fila-label{width:20px;font-weight:700;color:#64748b;font-size:.8rem;}
+    .butaca{width:30px;height:30px;border-radius:6px 6px 3px 3px;border:none;cursor:pointer;font-size:.65rem;font-weight:700;transition:transform .12s;}
+    .butaca:hover:not(.ocupado){transform:translateY(-2px);}
+    .butaca.libre{background:#cbd5e1;color:#475569;}
+    .butaca.elegido{background:var(--primary);color:#0f172a;box-shadow:0 0 0 2px rgba(66,184,131,.4);}
+    .butaca.ocupado{background:#475569;color:#94a3b8;cursor:not-allowed;}
+    .leyenda{display:flex;gap:1rem;justify-content:center;margin-top:1rem;font-size:.78rem;color:#64748b;}
+    .leyenda span{display:inline-flex;align-items:center;gap:.35rem;}
+    .dot{width:14px;height:14px;border-radius:4px;display:inline-block;}
+    .dot.libre{background:#cbd5e1;}.dot.elegido{background:var(--primary);}.dot.ocupado{background:#475569;}
+
+    .resumen{flex:1;min-width:250px;background:#0f172a;color:#e2e8f0;border-radius:12px;padding:1.25rem;height:fit-content;}
+    .resumen h4{margin:0 0 .8rem;color:var(--primary);}
+    .resumen label{display:block;font-weight:600;margin:.7rem 0 .25rem;font-size:.85rem;color:#cbd5e1;}
+    .resumen input,.resumen select{width:100%;padding:.5rem .7rem;border:1px solid #334155;border-radius:8px;background:#1e293b;color:#e2e8f0;font-size:.9rem;}
+    .chips{display:flex;flex-wrap:wrap;gap:.3rem;min-height:24px;margin:.3rem 0;}
+    .chip{background:var(--primary);color:#0f172a;padding:.1rem .5rem;border-radius:999px;font-size:.75rem;font-weight:700;}
+    .linea{display:flex;justify-content:space-between;padding:.3rem 0;font-size:.9rem;}
+    .linea.total{border-top:1px solid #334155;margin-top:.4rem;padding-top:.5rem;font-size:1.15rem;}
+    .linea.total b{color:#86efac;}
+    .aviso{background:rgba(251,191,36,.15);color:var(--gold);border-radius:8px;padding:.5rem .7rem;font-size:.82rem;font-weight:600;margin:.6rem 0;}
+    .btn{background:var(--primary);color:#0f172a;border:none;padding:.6rem 1rem;border-radius:8px;font-weight:700;cursor:pointer;font-size:.92rem;width:100%;margin-top:.8rem;}
+    .btn:disabled{background:#334155;color:#64748b;cursor:not-allowed;}
+    .ok{background:#dcfce7;color:#166534;padding:.8rem;border-radius:8px;font-weight:600;margin-top:.7rem;font-size:.9rem;}
+    .empty{color:#64748b;font-style:italic;font-size:.85rem;}
+    .todo{background:#fff7ed;border-left:4px solid #fb923c;padding:.5rem .7rem;border-radius:0 6px 6px 0;font-size:.82rem;color:#9a3412;margin:.6rem 0;}
+
+    .checklist,.deploy{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.4rem;margin-top:1.5rem;}
+    .checklist h3,.deploy h3{margin-top:0;color:var(--primary);}
+    .checklist li{margin:.3rem 0;font-size:.92rem;}
+    .deploy ol{padding-left:1.2rem;}.deploy li{margin:.5rem 0;font-size:.92rem;}
+    .deploy .share{background:rgba(56,189,248,.1);border-left:4px solid var(--accent);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin-top:1rem;}
+    kbd{background:#0b1220;border:1px solid var(--line);border-radius:5px;padding:.05rem .4rem;font-size:.82em;}
+    footer{padding:1.5rem;color:var(--muted);text-align:center;font-size:.85rem;}
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="badge">MÓDULO 6 · LECCIÓN 3 · PRÁCTICA FINAL</span>
+  <h1>🎬 TalentoCine — Selección de butacas (en parejas, 60 min)</h1>
+  <p>Construyan el selector de asientos de un cine aplicando <code>reactive</code>, <code>computed</code>,
+  <code>watch</code> y <code>v-model</code>. El mapa de la sala y el diseño ya están armados: su trabajo es
+  darle VIDA con la lógica reactiva. Al final lo publican en <strong>GitHub Pages</strong> y le pasan la URL al profe.</p>
+</header>
+
+<main>
+
+  <!-- ================= ROLES ================= -->
+  <div class="brief">
+    <div class="card rolA">
+      <h3>🅰️ Rol A — Estado &amp; Butacas</h3>
+      <p style="margin:.2rem 0;color:var(--muted);font-size:.9rem;">Maneja la sala y lo que cuesta.</p>
+      <ul>
+        <li><code>toggleAsiento(id)</code> — elegir/soltar una butaca (las ocupadas no se tocan).</li>
+        <li><code>elegidos</code> — computed con las butacas en estado "elegido".</li>
+        <li><code>cantidad</code> — computed: cuántas butacas van elegidas.</li>
+        <li><code>subtotal</code> — computed: cantidad × precio base.</li>
+        <li><code>total</code> — computed: subtotal + recargo si la función es 3D.</li>
+      </ul>
+    </div>
+    <div class="card rolB">
+      <h3>🅱️ Rol B — Cliente &amp; Reglas</h3>
+      <p style="margin:.2rem 0;color:var(--muted);font-size:.9rem;">Maneja al comprador y las validaciones.</p>
+      <ul>
+        <li><code>puedeComprar</code> — computed: hay butacas Y hay nombre.</li>
+        <li><code>watch</code> sobre <code>cantidad</code>: avisar si eligen más de 6.</li>
+        <li><code>comprar()</code> — si se puede, marca la compra como lista.</li>
+        <li>El <code>v-model</code> de <code>cliente.nombre</code> y del tipo de función.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================= CONTRATO ================= -->
+  <div class="contract">
+    <h3>🤝 Contrato compartido — acuérdenlo ANTES de codear</h3>
+    <pre>ESTADO (ya está dado, no lo borren):
+  asientos          -> array reactive de { id, fila, col, estado }
+                       estado puede ser: 'libre' | 'elegido' | 'ocupado'
+  cliente.nombre    -> string  (v-model, Rol B)
+  tipoFuncion       -> ref 'normal' | '3d'  (v-model, Rol B)
+  PRECIO_BASE = 4500 · RECARGO_3D = 1500   (constantes dadas)
+
+QUE COMPLETA CADA UNO:
+  Rol A -> toggleAsiento(id) · elegidos · cantidad · subtotal · total
+  Rol B -> puedeComprar · comprar() · watch(cantidad) · comprado (ref)</pre>
+  </div>
+
+  <!-- ================= LA APP ================= -->
+  <div id="app" class="app-shell">
+    <div class="cine-grid">
+
+      <!-- ----- Sala de cine (Rol A da la lógica, el mapa ya está pintado) ----- -->
+      <div class="sala">
+        <div class="pantalla">P A N T A L L A</div>
+
+        <div class="fila" v-for="fila in filas" :key="fila">
+          <span class="fila-label">{{ fila }}</span>
+          <button
+            v-for="a in asientosDeFila(fila)"
+            :key="a.id"
+            class="butaca"
+            :class="a.estado"
+            :disabled="a.estado === 'ocupado'"
+            @click="toggleAsiento(a.id)">
+            {{ a.col }}
+          </button>
+        </div>
+
+        <div class="leyenda">
+          <span><i class="dot libre"></i> Libre</span>
+          <span><i class="dot elegido"></i> Elegido</span>
+          <span><i class="dot ocupado"></i> Ocupado</span>
+        </div>
+      </div>
+
+      <!-- ----- Resumen y compra (Rol B) ----- -->
+      <div class="resumen">
+        <h4>🎟️ Tu compra</h4>
+
+        <div>Butacas elegidas:</div>
+        <div class="chips">
+          <span v-if="cantidad === 0" class="empty">Ninguna todavía</span>
+          <span class="chip" v-for="a in elegidos" :key="a.id">{{ a.id }}</span>
+        </div>
+
+        <label>Tipo de función</label>
+        <select v-model="tipoFuncion">
+          <option value="normal">2D — normal</option>
+          <option value="3d">3D — (+$1.500 por butaca)</option>
+        </select>
+
+        <label>Nombre de quien retira *</label>
+        <input type="text" v-model.trim="cliente.nombre" placeholder="Tu nombre" />
+
+        <div class="aviso" v-if="aviso">{{ aviso }}</div>
+
+        <div class="linea"><span>Butacas ({{ cantidad }})</span><b>${{ formato(subtotal) }}</b></div>
+        <div class="linea total"><span>Total</span><b>${{ formato(total) }}</b></div>
+
+        <button class="btn" :disabled="!puedeComprar" @click="comprar">
+          {{ puedeComprar ? 'Comprar entradas 🍿' : 'Elige butacas y escribe tu nombre' }}
+        </button>
+
+        <div v-if="comprado" class="ok">
+          ✅ ¡Listo {{ cliente.nombre }}! {{ cantidad }} butaca(s) por ${{ formato(total) }}.
+        </div>
+
+        <div class="todo">
+          💡 Al iniciar, el mapa se ve pero NADA reacciona. A medida que completen
+          los <code>TODO</code>, el cine cobra vida.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CHECKLIST ================= -->
+  <div class="checklist">
+    <h3>✅ Checklist — está listo cuando…</h3>
+    <ul>
+      <li>Al hacer clic, una butaca libre se pone verde (elegida) y vuelve a gris si la clicas de nuevo.</li>
+      <li>Las butacas ocupadas (gris oscuro) NO se pueden seleccionar.</li>
+      <li>Cada butaca elegida aparece como chip en "Tu compra" y suma al total.</li>
+      <li>Cambiar a función 3D recalcula el total (+$1.500 por butaca).</li>
+      <li>Si eligen más de 6 butacas, aparece el aviso amarillo (watch).</li>
+      <li>El botón "Comprar" solo se habilita con butacas + nombre, y muestra el mensaje de éxito.</li>
+    </ul>
+    <p style="margin:.6rem 0 0;color:var(--muted);font-size:.88rem;">
+      <b>Bonus:</b> impedir seleccionar más de 6 en <code>toggleAsiento</code> ·
+      botón "vaciar selección" · descuento si compran 4 o más · mostrar la fila con más asientos libres.
+    </p>
+  </div>
+
+  <!-- ================= DEPLOY A GITHUB PAGES ================= -->
+  <div class="deploy">
+    <h3>🚀 Publicar en GitHub Pages y compartir la URL</h3>
+    <p style="color:var(--muted);font-size:.9rem;margin-top:0;">
+      Como es un solo <code>index.html</code>, NO hay que compilar nada. GitHub Pages
+      lo sirve tal cual. Sigan estos pasos:</p>
+    <ol>
+      <li><b>Renombren el archivo a <code>index.html</code></b> (GitHub Pages busca ese nombre por defecto).</li>
+      <li>Creen un repositorio en GitHub: <kbd>github.com</kbd> → <b>New repository</b> →
+        nómbrenlo (ej: <code>talentocine</code>) → <b>Public</b> → <b>Create</b>.</li>
+      <li>Suban el archivo: en el repo, <b>Add file → Upload files</b> → arrastren
+        <code>index.html</code> → <b>Commit changes</b>.
+        <br><small style="color:var(--muted);">(O por consola: <code>git init · git add . · git commit -m "cine" · git branch -M main · git remote add origin URL · git push -u origin main</code>)</small></li>
+      <li>Activen Pages: <b>Settings → Pages</b> → en <b>Source</b> elijan
+        <b>Deploy from a branch</b> → Branch: <code>main</code> → carpeta <code>/ (root)</code> → <b>Save</b>.</li>
+      <li>Esperen ~1 minuto y recarguen. GitHub les mostrará la URL:
+        <code>https://TU-USUARIO.github.io/talentocine/</code></li>
+      <li>Abran esa URL (¡pruébenla también en el celular!) para confirmar que funciona.</li>
+    </ol>
+    <div class="share">
+      📨 <b>Entrega:</b> peguen la URL pública en el canal del curso / al profe, con los
+      <b>nombres de la pareja</b>. Ejemplo: <code>https://anita.github.io/talentocine/ — Ana &amp; Beto</code>
+    </div>
+  </div>
+
+</main>
+
+<footer>TalentoCine · Práctica final Lección 3 · <code>reactive</code> + <code>computed</code> + <code>watch</code> + <code>v-model</code></footer>
+
+<script>
+  const { createApp, reactive, ref, computed, watch } = Vue;
+
+  createApp({
+    setup() {
+      /* ====== DATOS BASE DE LA SALA (ya está dado, NO lo toquen) ====== */
+      const filas = ['A', 'B', 'C', 'D', 'E'];
+      const COLUMNAS = 8;
+      const YA_VENDIDAS = ['A3', 'A4', 'C5', 'D1', 'D2', 'E7']; // butacas ocupadas
+
+      function generarSala() {
+        const lista = [];
+        for (const f of filas) {
+          for (let c = 1; c <= COLUMNAS; c++) {
+            const id = f + c;
+            lista.push({ id, fila: f, col: c, estado: YA_VENDIDAS.includes(id) ? 'ocupado' : 'libre' });
+          }
+        }
+        return lista;
+      }
+      const asientos = reactive(generarSala());
+      const asientosDeFila = (f) => asientos.filter(a => a.fila === f);
+
+      // Constantes de precio (dadas)
+      const PRECIO_BASE = 4500;
+      const RECARGO_3D = 1500;
+      const formato = (n) => Number(n || 0).toLocaleString('es-CL');
+
+      // Estado del cliente (dado, lo usa Rol B con v-model)
+      const cliente = reactive({ nombre: '' });
+      const tipoFuncion = ref('normal');
+      const aviso = ref('');
+
+      /* ============================================================
+         🅰️  ROL A — ESTADO Y BUTACAS
+         ============================================================ */
+
+      function toggleAsiento(id) {
+        // TODO ROL A:
+        //  1. Buscar el asiento por id dentro de 'asientos'.
+        //  2. Si no existe o está 'ocupado' -> no hacer nada (return).
+        //  3. Si está 'libre' -> pasarlo a 'elegido'. Si está 'elegido' -> 'libre'.
+      }
+
+      const elegidos = computed(() => {
+        // TODO ROL A: devolver los asientos cuyo estado sea 'elegido'.
+        return [];
+      });
+
+      const cantidad = computed(() => {
+        // TODO ROL A: cuántos asientos hay elegidos.
+        return 0;
+      });
+
+      const subtotal = computed(() => {
+        // TODO ROL A: cantidad × PRECIO_BASE.
+        return 0;
+      });
+
+      const total = computed(() => {
+        // TODO ROL A: subtotal + (si tipoFuncion es '3d': cantidad × RECARGO_3D).
+        return 0;
+      });
+
+      /* ============================================================
+         🅱️  ROL B — CLIENTE Y REGLAS
+         ============================================================ */
+
+      const comprado = ref(false);
+
+      const puedeComprar = computed(() => {
+        // TODO ROL B: debe haber al menos 1 butaca elegida Y nombre no vacío.
+        return false;
+      });
+
+      // TODO ROL B: watch sobre 'cantidad'.
+      //  - Si es mayor a 6 -> aviso.value = 'Máximo 6 butacas por compra 🎫'
+      //  - Si no -> aviso.value = ''
+      watch(cantidad, (n) => {
+        // completa aquí
+      });
+
+      function comprar() {
+        // TODO ROL B: si puedeComprar es true, marcar comprado.value = true.
+      }
+
+      /* ====== Exponer al template ====== */
+      return {
+        filas, asientos, asientosDeFila, formato,
+        cliente, tipoFuncion, aviso,
+        // Rol A
+        toggleAsiento, elegidos, cantidad, subtotal, total,
+        // Rol B
+        comprado, puedeComprar, comprar,
+      };
+    }
+  }).mount('#app');
+</script>
+
+</body>
+</html>
